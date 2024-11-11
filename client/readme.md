@@ -76,6 +76,6 @@ daemon：启动守护进程，定期更新 SSH 配置。
 - --sshd-config-dir：指定 sshd 配置文件的目录，默认为 /etc/ssh/sshd_config.d/。
 - --file-name：指定 sshd 配置文件的名称，默认为 guard.conf。
 - --dry-run：启用此选项后将模拟执行命令，不会从server获取数据。
-- --address：指定服务器地址 如： https://guard.com
+- --address：指定服务器地址 如： https://test.com
 - --node-id：指定节点的唯一标识符。
 - --node-secret：指定节点的密钥，用于认证。
