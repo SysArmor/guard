@@ -1,0 +1,7 @@
+Package: guard-client
+Version: 1.0-1
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: went <wentevill@gmail.com>
+Description: A client tool for managing SSH configurations and Guard operation

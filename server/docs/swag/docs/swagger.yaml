@@ -1,0 +1,714 @@
+basePath: /
+definitions:
+  dto.Principals:
+    properties:
+      principals:
+        description: |-
+          Principals are the principals of the role
+          the principals are the email of the users
+        items:
+          type: string
+        type: array
+      role:
+        description: Role is the role of the principals
+        type: string
+    type: object
+  service.CreateNodeRequest:
+    properties:
+      accounts:
+        description: |-
+          Accounts is the account list of the node, it should
+          is account from the machine. If it is empty, the default
+          account is root.
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      ip:
+        description: IP is the ip address of the node
+        type: string
+      name:
+        description: Name is the name of the node
+        type: string
+    type: object
+  service.CreateNodeResponse:
+    properties:
+      id:
+        type: integer
+      secret:
+        description: |-
+          Secret is the secret of the node, it only show once
+          when the node is created
+        type: string
+      unique_id:
+        description: UniqueID is the unique id of the node
+        type: string
+    type: object
+  service.CreateRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  service.CreateSpaceRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  service.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      public_key:
+        description: PublicKey is the public key of the ssh key
+        type: string
+      username:
+        type: string
+    type: object
+  service.GrantCertRequest:
+    properties:
+      effect:
+        description: Effect in seconds
+        type: integer
+      start_date:
+        description: |-
+          StartDate is the start time of the certificate
+          If it is 0, it means the current time
+        type: integer
+    type: object
+  service.GrantCertResponse:
+    properties:
+      cert:
+        description: Cert is the certificate content
+        type: string
+    type: object
+  service.ListNodeResponse:
+    properties:
+      nodes:
+        items:
+          $ref: '#/definitions/service.ListNodeVO'
+        type: array
+      total:
+        type: integer
+    type: object
+  service.ListNodeVO:
+    properties:
+      accounts:
+        items:
+          type: string
+        type: array
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      last_heartbeat:
+        type: integer
+      name:
+        type: string
+      unique_id:
+        type: string
+    type: object
+  service.ListRoleVO:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  service.ListSpaceVO:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  service.RoleNodeListVO:
+    properties:
+      account:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      last_heartbeat:
+        type: integer
+      name:
+        type: string
+      unique_id:
+        type: string
+    type: object
+  service.RoleNodeRequest:
+    properties:
+      account:
+        description: Account is the account of the node, must from the node account
+          list
+        type: string
+      node_id:
+        description: |-
+          NodeID is the node id, one of node id and unique id is required
+          If both are provided, the node id is used
+        type: integer
+      unique_id:
+        description: UniqueID is the unique id of the node
+        type: string
+    type: object
+  service.RoleUserListVO:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  service.UserListVO:
+    properties:
+      ban:
+        description: |-
+          Ban is the status of the user
+          If it is true, the user is banned
+        type: boolean
+      created_at:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: integer
+      username:
+        type: string
+    type: object
+  service.UserVO:
+    properties:
+      ban:
+        type: boolean
+      created_at:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      public_key:
+        type: string
+      updated_at:
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is api document for Guard
+  termsOfService: https://github.com/sysarmor/guard
+  title: Swagger Guard API
+  version: "2.0"
+paths:
+  /api/v1/guard/ca:
+    get:
+      description: Get CA certificate
+      parameters:
+      - description: Node ID
+        in: query
+        name: node_id
+        required: true
+        type: string
+      - description: unix timestamp, seconds
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      responses:
+        "200":
+          description: CA certificate
+          schema:
+            type: string
+      summary: GetCA
+      tags:
+      - Guard
+  /api/v1/guard/krl:
+    get:
+      description: Get revoked key list (KRL)
+      parameters:
+      - description: Node ID
+        in: query
+        name: node_id
+        required: true
+        type: string
+      - description: unix timestamp, seconds
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      responses:
+        "200":
+          description: KRL
+          schema:
+            items:
+              type: integer
+            type: array
+      summary: GetKRL
+      tags:
+      - Guard
+  /api/v1/guard/principals:
+    get:
+      description: Get principals
+      parameters:
+      - description: Node ID
+        in: query
+        name: node_id
+        required: true
+        type: string
+      - description: unix timestamp, seconds
+        in: header
+        name: X-Timestamp
+        required: true
+        type: string
+      - description: signature
+        in: header
+        name: X-Signature
+        required: true
+        type: string
+      responses:
+        "200":
+          description: principals
+          schema:
+            items:
+              $ref: '#/definitions/dto.Principals'
+            type: array
+      summary: GetPrincipals
+      tags:
+      - Guard
+  /api/v1/guard/space:
+    get:
+      description: List spaces
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.ListSpaceVO'
+            type: array
+      summary: ListSpace
+      tags:
+      - space
+    post:
+      description: Create space
+      parameters:
+      - description: Create space request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateSpaceRequest'
+      responses:
+        "200":
+          description: OK
+      summary: CreateSpace
+      tags:
+      - space
+  /api/v1/guard/space/{spaceID}/node:
+    get:
+      description: List nodes
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ListNodeResponse'
+      summary: ListNode
+      tags:
+      - node
+    post:
+      description: Create node
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Create node request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateNodeRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.CreateNodeResponse'
+      summary: CreateNode
+      tags:
+      - node
+  /api/v1/guard/space/{spaceID}/node/{nodeID}:
+    delete:
+      description: Delete node
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Node ID
+        in: path
+        name: nodeID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+      summary: DeleteNode
+      tags:
+      - node
+  /api/v1/guard/space/{spaceID}/role:
+    get:
+      description: List roles
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.ListRoleVO'
+            type: array
+      summary: ListRole
+      tags:
+      - role
+  /api/v1/guard/space/{spaceID}/role/{roleID}:
+    delete:
+      description: Delete role
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+      summary: DeleteRole
+      tags:
+      - role
+  /api/v1/guard/space/{spaceID}/role/{roleID}/node:
+    get:
+      description: List role nodes
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.RoleNodeListVO'
+            type: array
+      summary: ListRoleNode
+      tags:
+      - role
+    post:
+      description: Add node to role
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      - description: node list
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/service.RoleNodeRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+      summary: AddNodeToRole
+      tags:
+      - role
+  /api/v1/guard/space/{spaceID}/role/{roleID}/node/batch/delete:
+    post:
+      description: Batch remove node from role
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      - description: Node IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: OK
+      summary: BatchRemoveNodeFromRole
+      tags:
+      - role
+  /api/v1/guard/space/{spaceID}/role/{roleID}/user:
+    get:
+      description: List role users
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.RoleUserListVO'
+            type: array
+      summary: ListRoleUser
+      tags:
+      - role
+    post:
+      description: Add user to role
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      - description: User IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: OK
+      summary: AddUserToRole
+      tags:
+      - role
+  /api/v1/guard/space/{spaceID}/role/{roleID}/user/batch/delete:
+    post:
+      description: Batch remove user from role
+      parameters:
+      - description: Space ID
+        in: path
+        name: spaceID
+        required: true
+        type: integer
+      - description: Role ID
+        in: path
+        name: roleID
+        required: true
+        type: integer
+      - description: User IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: OK
+      summary: BatchRemoveUserFromRole
+      tags:
+      - role
+  /api/v1/guard/user:
+    get:
+      description: Query user
+      parameters:
+      - description: Email
+        in: query
+        name: email
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserVO'
+      summary: QueryUser
+      tags:
+      - user
+    post:
+      description: Create user
+      parameters:
+      - description: Create user request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateUserRequest'
+      responses:
+        "200":
+          description: OK
+      summary: CreateUser
+      tags:
+      - user
+  /api/v1/guard/user/{userID}:
+    get:
+      description: Get user
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserVO'
+      summary: GetUser
+      tags:
+      - user
+  /api/v1/guard/user/{userID}/ban:
+    post:
+      description: Ban user
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+      summary: BanUser
+      tags:
+      - user
+  /api/v1/guard/user/{userID}/cert:
+    post:
+      description: Grant certificate
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Grant certificate request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.GrantCertRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GrantCertResponse'
+      summary: GrantCert
+      tags:
+      - user
+  /api/v1/guard/user/{userID}/publicKey:
+    put:
+      description: Update user public key
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: Public key
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: UpdateUserPublicKey
+      tags:
+      - user
+schemes:
+- http
+swagger: "2.0"

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Prepare the configuration directory
+# This is default configuration directory for guard-client
+mkdir -p /etc/ssh/auth_principals
+/usr/bin/guard-client init-sshd-config
+
+# Make sure the sshd service has loaded the new configuration
+systemctl restart sshd
+
+# Install guard-client as a service
+systemctl daemon-reload
+systemctl enable guard-client.service
+systemctl enable guard-client.timer
+systemctl start guard-client.timer

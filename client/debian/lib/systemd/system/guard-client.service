@@ -1,0 +1,10 @@
+[Unit]
+Description=Fetch CA, authorized principals, and revoked keys for SSH authentication
+After=sshd.target
+
+[Service]
+EnvironmentFile=-/etc/.guard-client
+ExecStart=/usr/lib/guard-client-fetch.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1052 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "This is api document for Guard",
+        "title": "Swagger Guard API",
+        "termsOfService": "https://github.com/sysarmor/guard",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/guard/ca": {
+            "get": {
+                "description": "Get CA certificate",
+                "tags": [
+                    "Guard"
+                ],
+                "summary": "GetCA",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node ID",
+                        "name": "node_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "unix timestamp, seconds",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CA certificate",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/krl": {
+            "get": {
+                "description": "Get revoked key list (KRL)",
+                "tags": [
+                    "Guard"
+                ],
+                "summary": "GetKRL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node ID",
+                        "name": "node_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "unix timestamp, seconds",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KRL",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/principals": {
+            "get": {
+                "description": "Get principals",
+                "tags": [
+                    "Guard"
+                ],
+                "summary": "GetPrincipals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Node ID",
+                        "name": "node_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "unix timestamp, seconds",
+                        "name": "X-Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "signature",
+                        "name": "X-Signature",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "principals",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Principals"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space": {
+            "get": {
+                "description": "List spaces",
+                "tags": [
+                    "space"
+                ],
+                "summary": "ListSpace",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.ListSpaceVO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create space",
+                "tags": [
+                    "space"
+                ],
+                "summary": "CreateSpace",
+                "parameters": [
+                    {
+                        "description": "Create space request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateSpaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/node": {
+            "get": {
+                "description": "List nodes",
+                "tags": [
+                    "node"
+                ],
+                "summary": "ListNode",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ListNodeResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create node",
+                "tags": [
+                    "node"
+                ],
+                "summary": "CreateNode",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Create node request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateNodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateNodeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/node/{nodeID}": {
+            "delete": {
+                "description": "Delete node",
+                "tags": [
+                    "node"
+                ],
+                "summary": "DeleteNode",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Node ID",
+                        "name": "nodeID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role": {
+            "get": {
+                "description": "List roles",
+                "tags": [
+                    "role"
+                ],
+                "summary": "ListRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.ListRoleVO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role/{roleID}": {
+            "delete": {
+                "description": "Delete role",
+                "tags": [
+                    "role"
+                ],
+                "summary": "DeleteRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role/{roleID}/node": {
+            "get": {
+                "description": "List role nodes",
+                "tags": [
+                    "role"
+                ],
+                "summary": "ListRoleNode",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.RoleNodeListVO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add node to role",
+                "tags": [
+                    "role"
+                ],
+                "summary": "AddNodeToRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "node list",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.RoleNodeRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role/{roleID}/node/batch/delete": {
+            "post": {
+                "description": "Batch remove node from role",
+                "tags": [
+                    "role"
+                ],
+                "summary": "BatchRemoveNodeFromRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Node IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role/{roleID}/user": {
+            "get": {
+                "description": "List role users",
+                "tags": [
+                    "role"
+                ],
+                "summary": "ListRoleUser",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/service.RoleUserListVO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add user to role",
+                "tags": [
+                    "role"
+                ],
+                "summary": "AddUserToRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/space/{spaceID}/role/{roleID}/user/batch/delete": {
+            "post": {
+                "description": "Batch remove user from role",
+                "tags": [
+                    "role"
+                ],
+                "summary": "BatchRemoveUserFromRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Space ID",
+                        "name": "spaceID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Role ID",
+                        "name": "roleID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/user": {
+            "get": {
+                "description": "Query user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "QueryUser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserVO"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "CreateUser",
+                "parameters": [
+                    {
+                        "description": "Create user request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/user/{userID}": {
+            "get": {
+                "description": "Get user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "GetUser",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserVO"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/user/{userID}/ban": {
+            "post": {
+                "description": "Ban user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "BanUser",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/user/{userID}/cert": {
+            "post": {
+                "description": "Grant certificate",
+                "tags": [
+                    "user"
+                ],
+                "summary": "GrantCert",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Grant certificate request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.GrantCertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.GrantCertResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/guard/user/{userID}/publicKey": {
+            "put": {
+                "description": "Update user public key",
+                "tags": [
+                    "user"
+                ],
+                "summary": "UpdateUserPublicKey",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Public key",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.Principals": {
+            "type": "object",
+            "properties": {
+                "principals": {
+                    "description": "Principals are the principals of the role\nthe principals are the email of the users",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "role": {
+                    "description": "Role is the role of the principals",
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateNodeRequest": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "description": "Accounts is the account list of the node, it should\nis account from the machine. If it is empty, the default\naccount is root.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "ip": {
+                    "description": "IP is the ip address of the node",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name is the name of the node",
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateNodeResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "description": "Secret is the secret of the node, it only show once\nwhen the node is created",
+                    "type": "string"
+                },
+                "unique_id": {
+                    "description": "UniqueID is the unique id of the node",
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateRoleRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateSpaceRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "description": "PublicKey is the public key of the ssh key",
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.GrantCertRequest": {
+            "type": "object",
+            "properties": {
+                "effect": {
+                    "description": "Effect in seconds",
+                    "type": "integer"
+                },
+                "start_date": {
+                    "description": "StartDate is the start time of the certificate\nIf it is 0, it means the current time",
+                    "type": "integer"
+                }
+            }
+        },
+        "service.GrantCertResponse": {
+            "type": "object",
+            "properties": {
+                "cert": {
+                    "description": "Cert is the certificate content",
+                    "type": "string"
+                }
+            }
+        },
+        "service.ListNodeResponse": {
+            "type": "object",
+            "properties": {
+                "nodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.ListNodeVO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.ListNodeVO": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "last_heartbeat": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "unique_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ListRoleVO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ListSpaceVO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.RoleNodeListVO": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "last_heartbeat": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "unique_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.RoleNodeRequest": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "description": "Account is the account of the node, must from the node account list",
+                    "type": "string"
+                },
+                "node_id": {
+                    "description": "NodeID is the node id, one of node id and unique id is required\nIf both are provided, the node id is used",
+                    "type": "integer"
+                },
+                "unique_id": {
+                    "description": "UniqueID is the unique id of the node",
+                    "type": "string"
+                }
+            }
+        },
+        "service.RoleUserListVO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserListVO": {
+            "type": "object",
+            "properties": {
+                "ban": {
+                    "description": "Ban is the status of the user\nIf it is true, the user is banned",
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserVO": {
+            "type": "object",
+            "properties": {
+                "ban": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

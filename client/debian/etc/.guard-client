@@ -1,0 +1,8 @@
+# The address of the Guard server (e.g., https://guard.com)
+ADDRESS=
+
+# The unique node identifier for this machine
+NODE_ID=
+
+# The secret key for this node to authenticate with the server
+NODE_SECRET=
