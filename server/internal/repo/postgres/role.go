@@ -326,3 +326,29 @@ func (r *role) ListRevokedKeys(ctx context.Context, nodeID int64) ([]int64, erro
 
 	return revokedKeys, nil
 }
+
+// ListUserPublicKeyByRoleID lists user public key by role id
+func (r *role) ListUserPublicKeyByRoleID(ctx context.Context, roleID int64) ([]string, error) {
+	rows, err := r.queryContext(ctx,
+		`SELECT pub_key FROM "user" as u 
+		LEFT JOIN role_user ru ON ru.user_id = u.id 
+		LEFT JOIN role ON ru.role_id = role.id 
+		WHERE role.id = $1`, roleID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	keys := make([]string, 0)
+	for rows.Next() {
+		var key sql.NullString
+		err = rows.Scan(&key)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan public key: %w", err)
+		}
+		keys = append(keys, key.String)
+	}
+
+	return keys, nil
+}

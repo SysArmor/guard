@@ -54,6 +54,7 @@ func New() *cobra.Command {
 	root.AddCommand(newPrincipals(sshdConfig, guard))
 	root.AddCommand(newDaemon(sshdConfig, guard))
 	root.AddCommand(newRevokedKeys(sshdConfig, guard))
+	root.AddCommand(newAuthorizedKeys(sshdConfig, guard))
 
 	flags := root.PersistentFlags()
 	flags.StringVarP(&sshdConfigDir, "sshd-config-dir", "d", "/etc/ssh/sshd_config.d/", "The directory of sshd config files, default is /etc/ssh/sshd_config.d/")

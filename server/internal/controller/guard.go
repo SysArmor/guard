@@ -91,6 +91,32 @@ func (g *Guard) GetKRL(c *gin.Context) {
 	response(c, krl, nil)
 }
 
+// @Summary GetAuthorizedKeys
+// @Description Get authorized keys
+// @Tags Guard
+// @Param node_id query string true "Node ID"
+// @Param X-Timestamp header string true "unix timestamp, seconds"
+// @Param X-Signature header string true "signature"
+// @Success 200 {object} []string "Authorized keys"
+// @Router /api/v1/guard/authorizedKeys [get]
+func (g *Guard) GetAuthorizedKeys(c *gin.Context) {
+	nodeID := c.Query("nodeID")
+	if nodeID == "" {
+		c.AbortWithError(http.StatusBadRequest, errors.ErrNodeNotFound)
+		return
+	}
+
+	ctx := c.Request.Context()
+	keys, err := g.svc.GetAuthorizedKeys(ctx, nodeID)
+	if err != nil {
+		slog.ErrorContext(ctx, err.Error(), "node id", nodeID)
+		response(c, nil, err)
+		return
+	}
+
+	response(c, keys, nil)
+}
+
 // @Summary CreateUser
 // @Description Create user
 // @Tags user

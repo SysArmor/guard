@@ -95,6 +95,24 @@ func (g *HTTPGuard) GetKRL(ctx context.Context) (string, error) {
 	return decodeResp[string](g.nodeSecret, resp)
 }
 
+func (g *HTTPGuard) GetAuthorizedKeys(ctx context.Context) ([]string, error) {
+	url := *g.tgt
+	url.Path = "/api/v1/guard/authorized_keys"
+	url.RawQuery = "nodeID=" + g.nodeID
+
+	req := &http.Request{
+		Method: http.MethodGet,
+		URL:    &url,
+	}
+
+	resp, err := g.do(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to do request: %w", err)
+	}
+
+	return decodeResp[[]string](g.nodeSecret, resp)
+}
+
 func (g *HTTPGuard) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	g.signTimestamp(req)
 	req = req.WithContext(ctx)

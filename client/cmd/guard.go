@@ -78,3 +78,11 @@ func (g *guard) GetKRL(ctx context.Context) (string, error) {
 	}
 	return g.Guard.GetKRL(ctx)
 }
+
+func (g *guard) GetAuthorizedKeys(ctx context.Context) ([]string, error) {
+	err := g.initEndpoint()
+	if err != nil {
+		return nil, err
+	}
+	return g.Guard.GetAuthorizedKeys(ctx)
+}

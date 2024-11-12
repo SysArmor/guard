@@ -33,6 +33,7 @@ func (r *Route) Register() {
 		sg.GET("/ca", r.cc.GetCA)
 		sg.GET("/principals", r.cc.GetPrincipals)
 		sg.GET("/krl", r.cc.GetKRL)
+		sg.GET("/authorized_keys", r.cc.GetAuthorizedKeys)
 	}
 
 	space := e.Group("/api/v1/guard/space")

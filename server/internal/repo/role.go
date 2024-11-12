@@ -27,4 +27,5 @@ type RoleRepo interface {
 	GetRoleUserByRoleIDAndUserID(ctx context.Context, roleID, userID int64) (*model.RoleUser, error)
 
 	ListRevokedKeys(ctx context.Context, nodeID int64) ([]int64, error)
+	ListUserPublicKeyByRoleID(ctx context.Context, roleID int64) ([]string, error)
 }
