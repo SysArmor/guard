@@ -28,3 +28,10 @@ func (g *FakeGuard) GetPrincipals(ctx context.Context) ([]*dto.Principals, error
 func (g *FakeGuard) GetKRL(ctx context.Context) (string, error) {
 	return "", nil
 }
+
+func (g *FakeGuard) GetAuthorizedKeys(ctx context.Context) ([]string, error) {
+	return []string{
+		"fake-authorized-key",
+		"fake-authorized",
+	}, nil
+}

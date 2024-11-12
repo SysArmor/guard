@@ -15,6 +15,7 @@ type Guard interface {
 	GetPrincipals(ctx context.Context, uniqueID string) (PrincipalList, error)
 	GetNodeByUniqueID(ctx context.Context, uniqueID string) (*Node, error)
 	GetKRL(ctx context.Context, uniqueID string) (string, error)
+	GetAuthorizedKeys(ctx context.Context, uniqueID string) ([]string, error)
 
 	CreateUser(ctx context.Context, in *CreateUserRequest) (int64, error)
 	ListUser(ctx context.Context, in *ListUserRequest) (ListUserResponse, error)
@@ -197,4 +198,39 @@ func (g *guard) GetKRL(ctx context.Context, uniqueID string) (string, error) {
 	}
 
 	return base64.StdEncoding.EncodeToString(crl), nil
+}
+
+// GetAuthorizedKeys returns the public keys of the user with the given unique id.
+// If ssh server not support certificate authentication, the public key is used for authentication.
+func (g *guard) GetAuthorizedKeys(ctx context.Context, uniqueID string) ([]string, error) {
+	node, err := g.repo.Node().GetByUniqueID(ctx, uniqueID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get node by unique id: %w", err)
+	}
+
+	roleIDs, err := g.repo.Role().ListRoleNodeByNodeID(ctx, node.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list role node by node id: %w", err)
+	}
+
+	publicKeys := make([]string, 0)
+	publicKeysIndex := make(map[string]struct{})
+
+	for _, roleID := range roleIDs {
+		keys, err := g.repo.Role().ListUserPublicKeyByRoleID(ctx, roleID.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list user public key by role id: %w", err)
+		}
+
+		for _, key := range keys {
+			if _, ok := publicKeysIndex[key]; ok {
+				continue
+			}
+
+			publicKeys = append(publicKeys, key)
+			publicKeysIndex[key] = struct{}{}
+		}
+	}
+
+	return publicKeys, nil
 }
