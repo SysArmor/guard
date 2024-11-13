@@ -17,6 +17,7 @@ func New() *cobra.Command {
 	var fileName string
 	var dryRun bool
 
+	var daemon = &daemon{}
 	var guard = &guard{}
 
 	root := cobra.Command{
@@ -24,6 +25,12 @@ func New() *cobra.Command {
 		Short: "A client tool for managing SSH configurations and Guard operation",
 
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if daemon.isNeedDaemonize() {
+				if err := daemon.daemonize(cmd.Context()); err != nil {
+					return fmt.Errorf("failed to daemonize: %w", err)
+				}
+			}
+
 			if dryRun {
 				guard.Guard = &apis.FakeGuard{}
 			}
@@ -49,17 +56,18 @@ func New() *cobra.Command {
 		},
 	}
 
-	root.AddCommand(newSSHDConfig())
+	root.AddCommand(newSSHDConfig(&sshdConfigDir, &fileName))
 	root.AddCommand(newCA(sshdConfig, guard))
 	root.AddCommand(newPrincipals(sshdConfig, guard))
-	root.AddCommand(newDaemon(sshdConfig, guard))
 	root.AddCommand(newRevokedKeys(sshdConfig, guard))
 	root.AddCommand(newAuthorizedKeys(sshdConfig, guard))
 
 	flags := root.PersistentFlags()
-	flags.StringVarP(&sshdConfigDir, "sshd-config-dir", "d", "/etc/ssh/sshd_config.d/", "The directory of sshd config files, default is /etc/ssh/sshd_config.d/")
+	flags.StringVarP(&sshdConfigDir, "sshd-config-dir", "", "/etc/ssh/sshd_config.d/", "The directory of sshd config files, default is /etc/ssh/sshd_config.d/")
 	flags.StringVarP(&fileName, "file-name", "f", "guard.conf", "The config file name, default is guard.conf")
 	flags.BoolVar(&dryRun, "dry-run", false, "Dry run mode, default is false")
+
+	daemon.PersistentFlags(flags)
 	guard.PersistentFlags(flags)
 
 	return &root

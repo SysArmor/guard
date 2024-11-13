@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -10,129 +9,107 @@ import (
 	"syscall"
 
 	"github.com/robfig/cron"
-	"github.com/spf13/cobra"
-	"github.com/sysarmor/guard/server/pkg/apis"
+	flag "github.com/spf13/pflag"
 )
 
 type daemon struct {
-	config *Config
+	daemon bool
 
-	section []string
-	cron    string
+	cron string
 }
 
-func newDaemon(config *Config, guard apis.Guard) *cobra.Command {
-	daemon := &daemon{
-		config: config,
-	}
+func (d *daemon) PersistentFlags(flagSet *flag.FlagSet) {
+	flagSet.BoolVarP(&d.daemon, "daemon", "d", false, "Run the daemon, default is false")
+	flagSet.StringVarP(&d.cron, "cron", "c", "0 0/5 * * *", "The cron expression to run the daemon, default is every 5 minutes")
+}
 
-	command := &cobra.Command{
-		Use:   "daemon",
-		Short: "Start the guard daemon to manage SSH CA, principals, and revoked keys",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := daemon.daemonize(); err != nil {
-				return fmt.Errorf("failed to daemonize: %w", err)
-			}
-			return daemon.run(cmd.Context(), guard)
-		},
-	}
+func (d *daemon) isDaemon() bool {
+	return os.Getppid() == 1
+}
 
-	command.Flags().StringArrayVarP(&daemon.section, "section", "s", []string{"all"}, "The section to run, default is all, available sections: all, ca, principals, revoke-keys")
-	command.Flags().StringVarP(&daemon.cron, "cron", "c", "0 0/5 * * *", "The cron expression to run the daemon, default is every 5 minutes")
+func (d *daemon) isTrue() bool {
+	return d.daemon
+}
 
-	return command
+func (d *daemon) isNeedDaemonize() bool {
+	return d.isTrue()
 }
 
 // daemonize daemonize the process
-func (d *daemon) daemonize() error {
-	if os.Getppid() != 1 {
-		cmd := exec.Command(os.Args[0], os.Args[1:]...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			Setsid: true,
-		}
+func (d *daemon) daemonize(ctx context.Context) error {
+	name := os.Args[0]
+	arg := os.Args[1:]
+
+	if !d.isDaemon() {
+		d.run(name, arg...)
 		slog.Info("Daemonize the process")
-		if err := cmd.Start(); err != nil {
-			return err
-		}
+		// Exit the parent process, make the child process as a daemon
 		os.Exit(0)
+		return nil
 	}
+
+	d.cronRun(ctx, name, d.trimDaemonArgs(arg)...)
 	return nil
 }
 
-// fn is a function type
-type fn func(ctx context.Context) error
-
-// run runs the daemon
-func (d *daemon) run(ctx context.Context, guard apis.Guard) error {
-	fns, err := d.handleSection(ctx, guard)
-	if err != nil {
-		return fmt.Errorf("failed to handle section: %w", err)
-	}
-
-	cron := cron.New()
-	defer cron.Stop()
-
-	fn := func(ctx context.Context) {
-		for _, fn := range fns {
-			err := fn(ctx)
-			if err != nil {
-				slog.Error("Failed to run function",
-					"error", err,
-				)
-			}
-		}
-	}
-
-	fn(ctx)
-	cron.AddFunc(d.cron, func() {
-		fn(ctx)
+func (d *daemon) cronRun(ctx context.Context, name string, arg ...string) {
+	c := cron.New()
+	c.AddFunc(d.cron, func() {
+		d.run(name, arg...)
 	})
-	cron.Start()
 
+	c.Start()
+	defer c.Stop()
+
+	// Run the command immediately
+	d.run(name, arg...)
+
+	slog.Info("Start cron job")
 	<-ctx.Done()
-	slog.Info("Daemon stopped")
-	return nil
+	slog.Info("Stop cron job")
 }
 
-// handleSection handles the section flag
-func (d *daemon) handleSection(ctx context.Context, guard apis.Guard) ([]fn, error) {
-	fns := make([]fn, 0, 2)
-	for _, section := range d.section {
-		switch section {
-		case "all":
-			d.section = []string{"ca", "principals", "revoke-keys"}
-			return d.handleSection(ctx, guard)
-		case "ca":
-			fns = append(fns, func(ctx context.Context) error {
-				ca := ca{}
-				ca.guard.Guard = guard
-				ca.trustedUserCAKeys = strings.TrimSuffix(d.config.TrustedUserCAKeys, "%u")
+func (d *daemon) run(name string, arg ...string) {
+	cmd := exec.Command(name, arg...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setsid: true,
+	}
 
-				return ca.run(ctx)
-			})
-		case "principals":
-			fns = append(fns, func(ctx context.Context) error {
-				principals := principals{}
-				principals.guard.Guard = guard
-				principals.authorizedPrincipalsFile = strings.TrimSuffix(d.config.AuthorizedPrincipalsFile, "%u")
+	err := cmd.Start()
+	if err != nil {
+		slog.Error("Failed to start the daemon",
+			"error", err,
+		)
+	}
+}
 
-				return principals.run(ctx)
-			})
-		case "revoke-keys":
-			fns = append(fns, func(ctx context.Context) error {
-				revokeKeys := revokedKeys{}
-				revokeKeys.guard.Guard = guard
-				revokeKeys.revokeKeys = d.config.RevokeKeys
+// trimDaemonArgs trim the daemon args, remove the daemon flag and its value
+// such as --daemon, --daemon true, --daemon=true, -d, -d=true, -d true
+func (d *daemon) trimDaemonArgs(args []string) []string {
+	var result []string
+	skipNext := false
 
-				return revokeKeys.run(ctx)
-			})
-		default:
-			return nil, fmt.Errorf("unsupported section: %s", d.section)
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		if skipNext {
+			skipNext = false
+			continue
+		}
+
+		if arg == "--daemon" || arg == "-d" {
+			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
+				skipNext = true
+			}
+		} else if strings.HasPrefix(arg, "--daemon=") || strings.HasPrefix(arg, "-d=") {
+			continue
+		} else {
+			result = append(result, arg)
 		}
 	}
 
-	return fns, nil
+	return result
 }

@@ -25,7 +25,7 @@ type sshdConfig struct {
 	revokedKeys        string
 }
 
-func newSSHDConfig() *cobra.Command {
+func newSSHDConfig(sshdConfigDir, fileName *string) *cobra.Command {
 	sshdConfig := &sshdConfig{}
 
 	command := &cobra.Command{
@@ -33,6 +33,9 @@ func newSSHDConfig() *cobra.Command {
 		Short: "Initialize sshd config",
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			sshdConfig.sshdConfigDir = *sshdConfigDir
+			sshdConfig.fileName = *fileName
+
 			err := sshdConfig.run()
 			if err != nil {
 				slog.Error("Failed to run sshd config",
@@ -45,8 +48,6 @@ func newSSHDConfig() *cobra.Command {
 	}
 
 	flags := command.PersistentFlags()
-	flags.StringVarP(&sshdConfig.sshdConfigDir, "sshd-config-dir", "d", "/etc/ssh/sshd_config.d/", "The directory of sshd config files, default is /etc/ssh/sshd_config.d/")
-	flags.StringVarP(&sshdConfig.fileName, "file-name", "f", "guard.conf", "The config file name, default is guard.conf")
 	flags.StringVarP(&sshdConfig.authPrincipalsFile, "auth-principals-file", "", "/etc/ssh/auth_principals/%u", "The authorized principals file, default is /etc/ssh/auth_principals/%u")
 	flags.StringVarP(&sshdConfig.caPubFile, "ca-pub-file", "", "/etc/ssh/guard.pub", "The trusted user CA keys file, default is /etc/ssh/guard.pub")
 	flags.StringVarP(&sshdConfig.revokedKeys, "revoked-keys", "", "/etc/ssh/sshd_config.d/revoked-keys", "The revoked keys file, default is /etc/ssh/sshd_config.d/revoked-keys")
