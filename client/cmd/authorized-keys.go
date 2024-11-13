@@ -71,6 +71,7 @@ func (r *authorizedKeys) run(ctx context.Context) error {
 
 	if same {
 		slog.Info("Authorized keys are the same, no need to update")
+		return nil
 	}
 
 	return r.overwriteAuthorizedKeys(remoteAuthorizedKeys)
