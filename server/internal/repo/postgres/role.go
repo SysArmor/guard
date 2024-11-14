@@ -333,7 +333,7 @@ func (r *role) ListUserPublicKeyByRoleID(ctx context.Context, roleID int64) ([]s
 		`SELECT pub_key FROM "user" as u 
 		LEFT JOIN role_user ru ON ru.user_id = u.id 
 		LEFT JOIN role ON ru.role_id = role.id 
-		WHERE role.id = $1`, roleID)
+		WHERE role.id = $1 AND (u.ban != true OR ban is null)`, roleID)
 
 	if err != nil {
 		return nil, err
